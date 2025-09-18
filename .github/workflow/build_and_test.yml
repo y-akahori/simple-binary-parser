@@ -1,0 +1,45 @@
+name: C Project CI with Tests
+
+# ワークフローが実行されるタイミングを指定
+on:
+  # mainブランチにプッシュされた時
+  push:
+    branches: [ "main" ]
+  # mainブランチへのプルリクエストが作成された時
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    # 仮想環境として最新のUbuntuを使用
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. リポジトリのコードを仮想環境にチェックアウト
+    - name: Check out repository code
+      uses: actions/checkout@v4
+
+    # 2. ビルドに必要なツール (gcc, make, cmake) をインストール
+    - name: Install build dependencies
+      run: sudo apt-get update && sudo apt-get install -y build-essential cmake
+
+    # 3. ビルドディレクトリを作成し、CMakeでビルド設定を生成
+    - name: Configure CMake
+      run: cmake -S . -B build
+
+    # 4. プロジェクトをビルド (makeコマンドを実行)
+    - name: Build project
+      run: cmake --build build
+
+    # 5. テストを実行
+    - name: Run tests
+      run: |
+        cd build
+        ctest --verbose
+
+    # 6. (CDの一例) ビルド成果物(実行可能ファイル)をアップロード
+    - name: Upload executable artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: parser-executable
+        path: build/parser
