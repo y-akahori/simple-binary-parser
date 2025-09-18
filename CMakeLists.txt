@@ -14,14 +14,17 @@ add_compile_options(-Wall -Wextra -g)
 # --------------------------------------------------------------------
 # 1. パーサー機能をライブラリとして定義
 # --------------------------------------------------------------------
-add_library(parser_lib STATIC src/parser.c)
-target_include_directories(parser_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_library(logic_lib STATIC 
+    src/parser.c
+    src/sample.c
+)
+target_include_directories(logic_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # --------------------------------------------------------------------
 # 2. メインの実行可能ファイルを定義
 # --------------------------------------------------------------------
 add_executable(parser src/main.c)
-target_link_libraries(parser PRIVATE parser_lib)
+target_link_libraries(parser PRIVATE logic_lib)
 
 # --------------------------------------------------------------------
 # 3. テスト機能の有効化とテストプログラムの定義
@@ -36,8 +39,13 @@ target_include_directories(unity PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/unity)
 # テスト用の実行可能ファイルを定義
 add_executable(run_tests tests/test_parser.c)
 
-# テスト実行可能ファイルは、parser_libとunityの両ライブラリに依存
-target_link_libraries(run_tests PRIVATE parser_lib unity)
+# テスト実行可能ファイルは、logic_libとunityの両ライブラリに依存
+target_link_libraries(run_tests PRIVATE logic_lib unity)
 
 # "ParserTests"という名前のテストを登録し、実行コマンドを'run_tests'に設定
 add_test(NAME ParserTests COMMAND run_tests)
+
+# --- test_sample.c用のテスト定義 ---
+add_executable(run_sample_tests tests/test_sample.c)
+target_link_libraries(run_sample_tests PRIVATE logic_lib unity)
+add_test(NAME SampleTests COMMAND run_sample_tests)
